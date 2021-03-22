@@ -33,3 +33,5 @@ coverage
 
 .cache
 .eslintcache
+
+/packages/frontend/node_modules/

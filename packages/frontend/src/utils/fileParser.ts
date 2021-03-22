@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Record, DataSource } from '../global';
 import Papa from 'papaparse';
 

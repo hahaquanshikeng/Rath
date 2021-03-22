@@ -76,7 +76,8 @@ export interface FieldSummary {
 }
 export async function getFieldsSummaryService (dataSource: DataSource, fields: string[] | Field[], useServer?: boolean): Promise<FieldSummary[]> {
   let fieldSummaryList: FieldSummary[] = [];
-  if (useServer) {
+
+  if (useServer) {//默认纯前端不走服务接口
     try {
       const res = await fetch(server + '/api/service/fieldsSummary', {
         method: 'POST',
@@ -196,6 +197,21 @@ export async function combineFieldsService (dataSource: DataSource, dimensions: 
     }
     worker.terminate()
   }
+
+  console.log(
+    {
+      "方法":"combineFieldsService",
+      "操作":`
+        获得子空间列表
+        核心函数:
+        import { Insight } from 'visual-insights'
+        Insight.insightExtraction
+        此函数输出对应组合搜索中的矩阵图
+      `,
+      "输入":[dataSource, dimensions, measures, operator],
+      "输出":subspaceList
+    }
+  )
   return subspaceList
 }
 
@@ -255,6 +271,7 @@ export async function clusterMeasures (maxGroupNumber: number, combinedSpaces: V
     }
     worker.terminate();
   }
+
   return viewSpaces;
 }
 

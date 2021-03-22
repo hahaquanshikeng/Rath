@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DataSource, BIField, Field, OperatorType } from "./global";
 import {
   getFieldsSummaryService,
@@ -16,7 +17,9 @@ import { GlobalState, StateUpdater } from './state';
 type Action<T> = (select: () => GlobalState, updateState: (updater:StateUpdater<GlobalState>) => void, params: T) => any;
 
 
+
 const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = async (select, updateState, params) => {
+
   const { dataSource, fields } = params;
   const state = select();
   const dimensions = fields
@@ -30,11 +33,28 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
     /**
      * get summary of the orignal dataset(fields without grouped)
      */
+
+    //计算所有字段的  Distribution(看上去是指一个字段的所有值的出现频次) 类型(nominal temporal等)  熵
     const originSummary = await getFieldsSummaryService(
       dataSource,
       fields.map(f => f.name),
       state.useServer
     );
+    console.log(
+      {
+        "方法":"getFieldsSummaryService",
+        "操作":`
+          计算所有字段的  Distribution(看上去是指一个字段的所有值的出现频次) 类型(nominal temporal等)  熵
+          核心函数:
+          import { UnivariateSummary } from 'visual-insights';
+          const { getAllFieldsDistribution, getAllFieldTypes, getAllFieldsEntropy } = UnivariateSummary;
+        `,
+        "输出":originSummary
+      }
+    )
+    
+
+
     // todo only group dimension.
     let fieldWithTypeList: Field[] = originSummary
       ? originSummary
@@ -50,11 +70,24 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
      * bug:
      * should not group measures!!!
      */
+    //分组
     const groupedResult = await getGroupFieldsService(
       dataSource,
       fieldWithTypeList,
       state.useServer
     );
+    console.log(
+      {
+        "方法":"getGroupFieldsService",
+        "操作":`
+          分组
+          核心函数:
+          import { UnivariateSummary } from 'visual-insights';
+          UnivariateSummary.groupFields
+        `,
+        "输出":groupedResult
+      }
+    )
     const { groupedData, newFields } = groupedResult
       ? groupedResult
       : { groupedData: dataSource, newFields: fieldWithTypeList };
@@ -79,11 +112,22 @@ const univariateSummary: Action<{dataSource: DataSource; fields: BIField[]}> = a
     /**
      * groupedSummary only contains newFields generated during `groupFieldsService`.
      */
+    //对新增分组字段计算 Distribution(看上去是指一个字段的所有值的出现频次)  类型(nominal temporal等) 熵
     const groupedSummary = await getFieldsSummaryService(
       groupedData,
       newFields,
       state.useServer
     );
+    console.log(
+      {
+        "方法":"对分组新增字段执行getGroupFieldsService",
+        "操作":`
+          对新增分组字段计算 Distribution(看上去是指一个字段的所有值的出现频次)  类型(nominal temporal等) 熵
+        `,
+        "输出":groupedSummary
+      }
+    )
+
     
     updateState(draft => {
       draft.cookedDataSource = groupedData;
@@ -120,12 +164,13 @@ interface SubspaceSeachParams {
   measures: string[];
   operator: OperatorType
 }
-const subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState, params) => {
+const  subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState, params) => {
   const { groupedData: dataSource, summary, dimensions, measures, operator } = params;
   const state = select();
   updateState(draft => {
     draft.loading.subspaceSearching = true;
   });
+
   let orderedDimensions: Array<{ name: string; entropy: number }> = [];
   orderedDimensions = dimensions.map(d => {
     let target = summary.find(g => g.fieldName === d);
@@ -134,6 +179,7 @@ const subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState, 
       entropy: target ? target.entropy : Infinity
     };
   });
+
 
   orderedDimensions.sort((a, b) => a.entropy - b.entropy);
   updateState(draft => {
@@ -147,6 +193,7 @@ const subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState, 
       Math.round(orderedDimensions.length * state.topK.dimensionSize)
     );
   try {
+    // insightExtraction
     const subspaceList = await combineFieldsService(
       dataSource,
       selectedDimensions,
@@ -198,14 +245,37 @@ const getViewSpaces: Action<GetViewSpacesProps> = async (select, updateState, pa
 }
 
 const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = async (state, updateState, params) => {
+  console.log({
+    "方法":"extractInsights",
+    "btn":"开始分析",
+    "params":"原始数据+字段信息(维度,标量)",
+    "rawParams":params,
+    "操作":`
+      univariateSummary
+      subspaceSearch
+    `
+  })
   const { dataSource, fields } = params;
   updateState(draft => {
     draft.loading.gallery = true
   })
   try {
+
     const univariateResult = await univariateSummary(state, updateState, {
       dataSource, fields
     });
+    console.log(
+      {
+        "方法":"univariateSummary",
+        "操作":`
+          1,计算所有字段的 Distribution(看上去是指一个字段的所有值的出现频次)  类型(nominal temporal等) 熵
+          2,分组
+          3,对分组后数据执行1
+          4,更新全局状态
+        `,
+        "输出":univariateResult
+      }
+    )
       if (univariateResult) {
         const {
           groupedData,
@@ -216,6 +286,19 @@ const extractInsights: Action<{dataSource: DataSource; fields: BIField[]}> = asy
         await subspaceSearch(state, updateState, {
           groupedData, summary, dimensions: newDimensions, measures, operator: "sum"
         });
+        console.log(
+          {
+            "方法":"subspaceSearch",
+            "操作":`
+              获得子空间列表
+            `,
+            "params":{
+              groupedData, summary, dimensions: newDimensions, measures, operator: "sum"
+            },
+            "输出":"见combineFieldsService"          
+          }
+        )
+        
       }
   } catch (error) {
   } finally {

@@ -111,6 +111,7 @@ const Gallery: React.FC<GalleryProps> = props => {
     });
     // todo:
     // should group number be the same for different subspaces?
+    // 聚类
     clusterMeasures(
       state.maxGroupNumber,
       subspaceList.map(space => {
@@ -122,6 +123,26 @@ const Gallery: React.FC<GalleryProps> = props => {
       }),
       state.useServer
     ).then(viewSpaces => {
+      console.log(
+        {
+          "方法":"clusterMeasures",
+          "操作":`
+            度量聚类
+            核心函数:
+            import { Cluster } from 'visual-insights';
+            输出值用于可视化洞察探索
+          `,
+          "输入": [state.maxGroupNumber,
+          subspaceList.map(space => {
+            return {
+              dimensions: space.dimensions,
+              measures: space.measures,
+              matrix: space.correlationMatrix
+            }
+          })],
+          "输出":viewSpaces
+        }
+      )
       setViewSpaces(viewSpaces);
       updateState(draft => {
         draft.loading.gallery = false;
@@ -155,6 +176,9 @@ const Gallery: React.FC<GalleryProps> = props => {
           dimensions,
           measures
         );
+        console.log(
+          {"可视化洞察探索切换,图":currentPage,"配置":viewState,"specification":schema,"核心函数":`import { specification } from "visual-insights";`}
+        )
         setDataView({
           schema,
           fieldFeatures: fieldScores.map(f => f[3]),
