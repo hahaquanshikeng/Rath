@@ -81,7 +81,14 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
     })
   }, [state.cookedMeasures, updateState])
 
+  console.log({
+    "行为":"使用的子空间调节(不重复计算)",
+    "前百分之k维度组合":state.topK.subspacePercentSize,
+    "usedSubspaceList":usedSubspaceList
+  })
+
   const onSpaceChange = useCallback((dimensions, measures, matrix) => {
+    console.log({"设置全局的ClusterState 使用combineFieldsService方法输出的经过子空间调节的 usedSubspaceList 中 score最大的一组数据":[dimensions, measures, matrix]})
     setClusterState({
       dimensions,
       measures,
@@ -113,6 +120,7 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
           valueFormat={(value: number) => `${value}%`}
           showValue={true}
           onChange={(value: number) => {
+
             updateState((draft) => {
               draft.topK.dimensionSize = value / 100
               draft.loading.subspaceSearching = true
@@ -121,6 +129,12 @@ const NoteBook: React.FC<NoteBookProps> = (props) => {
               0,
               Math.round((state.cookedDimensions.length * value) / 100)
             )
+
+            console.log({
+              "行为":"调节使用的前百分之k的维度",
+              "操作":`执行子空间搜索 combineFieldsService`,
+              "输入":[dataSource, selectedDimensions, state.cookedMeasures]
+            })
             combineFieldsService(dataSource, selectedDimensions, state.cookedMeasures, 'sum', state.useServer).then(
               (subspaces) => {
                 if (subspaces) {

@@ -27,6 +27,7 @@ const Subspaces: React.FC<SubspacesProps> = (props) => {
     let index = subspaceList.length - 1;
     if (index > -1) {
       let targetSpace = subspaceList[index];
+      console.log({"Mean of correlation 使用score最大的correlationMatrix,并且使用onSpaceChange回调更新全局状态":targetSpace})
       onSpaceChange(targetSpace.dimensions, targetSpace.measures.map(m => m.name), targetSpace.correlationMatrix);
       setCurIndex(index);
     }

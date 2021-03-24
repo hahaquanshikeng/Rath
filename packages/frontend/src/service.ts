@@ -206,7 +206,7 @@ export async function combineFieldsService (dataSource: DataSource, dimensions: 
         核心函数:
         import { Insight } from 'visual-insights'
         Insight.insightExtraction
-        此函数输出对应组合搜索中的矩阵图
+        此函数输出measures对应组合搜索中的Mean of measureValue
       `,
       "输入":[dataSource, dimensions, measures, operator],
       "输出":subspaceList

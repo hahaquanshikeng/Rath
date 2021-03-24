@@ -180,8 +180,9 @@ const  subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState,
     };
   });
 
-
+  //维度排序
   orderedDimensions.sort((a, b) => a.entropy - b.entropy);
+  console.log("维度排序使用熵作为依据")
   updateState(draft => {
     draft.cookedDimensions = orderedDimensions.map(d => d.name);
     draft.cookedMeasures = measures;
@@ -192,6 +193,7 @@ const  subspaceSearch: Action<SubspaceSeachParams> = async (select, updateState,
       0,
       Math.round(orderedDimensions.length * state.topK.dimensionSize)
     );
+
   try {
     // insightExtraction
     const subspaceList = await combineFieldsService(

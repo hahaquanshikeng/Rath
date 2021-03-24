@@ -45,6 +45,13 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
      * maxGroupNumber = the measures length / max visual channel for measure.
      */
     let { edgesInMST, groups } = Cluster.kruskalWithFullMST(adjMatrix, state.maxGroupNumber);
+    console.log(
+      {
+      "方法":"Cluster.kruskalWithFullMST",
+      "输入":[adjMatrix, state.maxGroupNumber],
+      "输出":[edgesInMST, groups]
+      }
+    )
     return { edgesInMST, groups }
   }, [adjMatrix, state.maxGroupNumber])
   const treeData = useMemo<TreeData>(() => {
@@ -226,6 +233,7 @@ const ClusterBoard: React.FC<ClusterBoardProps> = (props) => {
             let measuresInView = measures.filter((mea, index) => {
               return clusterResult.groups[index] === group
             });
+            console.log("选中组的度量",measuresInView)
             onFocusGroup(measuresInView);
           }
         })
