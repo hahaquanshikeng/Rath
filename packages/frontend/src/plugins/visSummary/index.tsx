@@ -20,10 +20,14 @@ interface StoryTellerProps {
 const StoryTeller: React.FC<StoryTellerProps> = (props) => {
   const { space, dimensions = [], measures = [], dimScores = [], spaceList = [], schema } = props;
   const [isTeachingBubbleVisible, setIsTeachingBubbleVisible] = useState(false);
-
+console.log(6767,dimScores)
   const sortedFieldsScores = useMemo<Array<[string, number, number, Field]>>(() => {
+    // 排序依据：dimScores[1]->entropy, dimScores[2]->maxEntropy,
     return [...dimScores].sort((a, b) => a[1] - b[1]);
   }, [dimScores])
+
+  // 从spaceList 取出 被当前选中space中dimList包含的 score最小的 space中的被包含的第一个dim 作为mostInfluencedDimension
+  //TODO:score的计算逻辑 已知定位在combineFields中
   const mostInfluencedDimension = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
     for (let sp of spaceList) {
@@ -36,6 +40,8 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
       }
     }
   }, [space, spaceList])
+  // 选出currentSpace与dataView共有的measures中 value最小的作为bestMeasure
+    //TODO:value的计算逻辑 已知定位在combineFields中
   const bestMeasure = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
     const measuresInView = space.measures.filter(mea => measures.includes(mea.name));
@@ -49,7 +55,7 @@ const StoryTeller: React.FC<StoryTellerProps> = (props) => {
     }
     return measuresInView[minPos].name;
   }, [measures, space])
-
+// 选出当前dataView.dimensions中熵最小的作为countDiffField 
   const countDiffField = useMemo<string | undefined>(() => {
     let ans = sortedFieldsScores.find(dim => dimensions.includes(dim[0]));
     return ans ? ans[0] : undefined;

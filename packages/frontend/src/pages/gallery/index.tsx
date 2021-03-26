@@ -223,6 +223,14 @@ const Gallery: React.FC<GalleryProps> = props => {
   useEffect(() => {
     setShowAssociation(false);
   }, [currentPage]);
+  console.log({
+    "探索页面 数据定义":"gallery",
+    "dataView":dataView,
+    "dimScores":dimScores,
+    "subspaceList":subspaceList,
+    "currentSpace":currentSpace,
+    "visualConfig":visualConfig
+  })
   return (
     <div className="content-container">
       <PreferencePanel
@@ -340,6 +348,7 @@ const Gallery: React.FC<GalleryProps> = props => {
                   </Stack>
                   <h3>Specification</h3>
                   <pre>{JSON.stringify(dataView.schema, null, 2)}</pre>
+                  
                   <VisSummary
                     dimensions={dataView.dimensions}
                     measures={dataView.measures}
