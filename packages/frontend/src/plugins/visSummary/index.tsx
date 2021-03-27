@@ -20,7 +20,6 @@ interface StoryTellerProps {
 const StoryTeller: React.FC<StoryTellerProps> = (props) => {
   const { space, dimensions = [], measures = [], dimScores = [], spaceList = [], schema } = props;
   const [isTeachingBubbleVisible, setIsTeachingBubbleVisible] = useState(false);
-console.log(6767,dimScores)
   const sortedFieldsScores = useMemo<Array<[string, number, number, Field]>>(() => {
     // 排序依据：dimScores[1]->entropy, dimScores[2]->maxEntropy,
     return [...dimScores].sort((a, b) => a[1] - b[1]);
@@ -28,6 +27,10 @@ console.log(6767,dimScores)
 
   // 从spaceList 取出 被当前选中space中dimList包含的 score最小的 space中的被包含的第一个dim 作为mostInfluencedDimension
   //TODO:score的计算逻辑 已知定位在combineFields中
+  // 是在不同维度下各个度量的熵(value)的和
+  // 定位计算函数路径
+  ///frontend/src/workers/combineFields.worker.js
+  //node_modules/visual-insights/build/esm/insights/impurity.js
   const mostInfluencedDimension = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
     for (let sp of spaceList) {
@@ -40,8 +43,8 @@ console.log(6767,dimScores)
       }
     }
   }, [space, spaceList])
-  // 选出currentSpace与dataView共有的measures中 value最小的作为bestMeasure
-    //TODO:value的计算逻辑 已知定位在combineFields中
+  // 选出currentSpace与dataView共有的measures中 value(熵)最小的作为bestMeasure
+  // 定位计算函数路径 /node_modules/visual-insights/build/esm/insights/impurity.js
   const bestMeasure = useMemo<string | undefined>(() => {
     if (typeof space === 'undefined') return;
     const measuresInView = space.measures.filter(mea => measures.includes(mea.name));

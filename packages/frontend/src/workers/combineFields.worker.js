@@ -16,6 +16,7 @@ const combineFields = (e) => {
       }
     });
     impurityList.sort((a, b) => a.score - b.score);
+
     let end = Math.round(topKPercent * impurityList.length)
     self.postMessage({
       success: true,
